@@ -3,8 +3,9 @@ import { User } from "../user/types";
 export interface Post {
     id: number;
     title: string;
-    body: string;
-    userId: number;
+    content: string;
+    authorId: number;
+    createdAt: string;
     tags?: string[];
     reactions?: {
       likes: number;
@@ -16,6 +17,7 @@ export interface Post {
 
   export interface NewPost {
     title: string;
-    body: string;
-    userId: number;
+    content: string;
+    authorId: number;
+    tags?: string[];
   }

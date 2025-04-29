@@ -1,16 +1,16 @@
-import { User } from "../user/types";
+import { User } from "@/entities/user/types";
 
 export interface Comment {
     id: number;
     body: string;
     postId: number;
-    userId: number;
-    user: User; 
-    likes: number;
-  }
-  
-  export interface NewComment {
+    authorId: User["id"];
+    createdAt: string;
+    likes?: number;
+}
+
+export interface NewComment {
     body: string;
-    postId: number | null;
-    userId: number;
-  }
+    postId: number;
+    authorId: number;
+}

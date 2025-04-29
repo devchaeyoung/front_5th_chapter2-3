@@ -25,9 +25,9 @@ import {
   TableRow,
   Textarea,
 } from "../shared/ui"
-import type { NewPost, Post } from "../entities/post/types"
-import type { NewComment, Comment } from "../entities/comment/types"
-import type { User } from "../entities/user/types"
+import type { NewPost, Post } from "@/entities/post/types"
+import type { NewComment, Comment } from "@/entities/comment/types"
+import type { User } from "@/entities/user/types"
 
 const PostsManager = () => {
   const navigate = useNavigate()
@@ -87,9 +87,9 @@ const PostsManager = () => {
       .then((response) => response.json())
       .then((users) => {
         usersData = users.users
-        const postsWithUsers = postsData.posts.map((post) => ({
+        const postsWithUsers = postsData.posts.map((post:Post) => ({
           ...post,
-          author: usersData.find((user) => user.id === post.userId),
+          author: usersData.find((user:User) => user.id === post.userId),
         }))
         setPosts(postsWithUsers)
         setTotal(postsData.total)
