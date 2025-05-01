@@ -1,4 +1,4 @@
-import { NewComment, Comment } from '@/shared/types/comment'
+import { NewComment, Comment } from '@/types/comment'
 
 export const fetchComments = async (postId: number): Promise<Comment[]> => {
   try {

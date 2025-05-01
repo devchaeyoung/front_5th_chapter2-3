@@ -1,5 +1,5 @@
-import type { PaginatedResponse } from '../types/common'
-import type { User, UserDetail } from '@/shared/types/user'
+import type { PaginatedResponse } from '../../types/common'
+import type { User, UserDetail } from '@/types/user'
 
 export interface PostsResponse extends PaginatedResponse {
   users: User[]

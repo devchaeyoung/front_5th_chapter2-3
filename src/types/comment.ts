@@ -1,5 +1,5 @@
-import { User, UserDetail } from '@/shared/types/user'
-import { Post } from '@/shared/types/post'
+import { User, UserDetail } from '@/types/user'
+import { Post } from '@/types/post'
 
 export type CommentUser = Pick<UserDetail, 'id' | 'username'> & {
   fullname: string
@@ -16,7 +16,7 @@ export interface Comment {
 }
 
 export type NewCommentInput = Pick<Comment, 'body' | 'userId'> & {
-  postId: null | Post['id']
+  postId: Post['id'] | null
 }
 
 export interface AddComment {

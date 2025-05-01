@@ -1,5 +1,6 @@
-import { Post, NewPost, PostsSearchParams } from '@/shared/types/post'
-import { PaginatedResponse } from '../types/common'
+import { Post, NewPost, PostsSearchParams } from '@/types/post'
+import { PaginatedResponse } from '../../types/common'
+import { api } from './instance'
 
 export type PostsPaginationParams = Pick<PostsSearchParams, 'limit' | 'skip'>
 export interface PostsResponse extends PaginatedResponse {
@@ -57,8 +58,9 @@ export const postsApi = {
 
 export const fetchPosts = async ({ limit, skip }: PostsPaginationParams): Promise<PostsResponse> => {
   try {
-    const response = await fetch(`/api/posts?limit=${limit}&skip=${skip}`)
-    const data = await response.json()
+    const url = `/api/posts?limit=${limit}&skip=${skip}`
+    const res = await api.get(url)
+    const data = await res.json()
     return data
   } catch (error: unknown) {
     console.error('Error fetching posts:', error)

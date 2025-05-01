@@ -25,9 +25,9 @@ import {
   TableRow,
   Textarea,
 } from '../shared/ui'
-import type { NewPost, Post } from '@/shared/types/post'
-import type { Comment, NewCommentInput } from '@/shared/types/comment'
-import type { User } from '@/shared/types/user'
+import type { NewPost, Post } from '@/types/post'
+import type { Comment, NewCommentInput } from '@/types/comment'
+import type { User } from '@/types/user'
 import { fetchPosts } from '../shared/api/posts'
 import { fetchUsers } from '../shared/api/users'
 
