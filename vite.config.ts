@@ -25,12 +25,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src'),
-      '@/shared': resolve(__dirname, './src/shared'),
-      '@/entities': resolve(__dirname, './src/entities'),
-      '@/features': resolve(__dirname, './src/features'),
-      '@/pages': resolve(__dirname, './src/pages'),
-      '@/components': resolve(__dirname, './src/components'),
+      '@': resolve(__dirname, 'src'),
     },
+    extensions: ['.ts', '.tsx', '.json'],
   },
 })
