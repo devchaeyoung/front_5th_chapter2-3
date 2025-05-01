@@ -25,9 +25,11 @@ import {
   TableRow,
   Textarea,
 } from '../shared/ui'
-import type { NewPost, Post } from '@/entities/post/types'
-import type { NewComment, Comment } from '@/entities/comment/types'
-import type { User } from '@/entities/user/types'
+import type { NewPost, Post } from '@/shared/types/post'
+import type { Comment, NewCommentInput } from '@/shared/types/comment'
+import type { User } from '@/shared/types/user'
+import { fetchPosts } from '../shared/api/posts'
+import { fetchUsers } from '../shared/api/users'
 
 const PostsManager = () => {
   const navigate = useNavigate()
@@ -42,7 +44,7 @@ const PostsManager = () => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null)
   const [selectedComment, setSelectedComment] = useState<Comment | null>(null)
   const [newPost, setNewPost] = useState<NewPost>({ title: '', body: '', userId: 1 })
-  const [newComment, setNewComment] = useState<NewComment>({ body: '', postId: null, userId: 1 })
+  const [newComment, setNewComment] = useState<NewCommentInput>({ body: '', postId: null, userId: 1 })
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
   const [skip, setSkip] = useState(parseInt(queryParams.get('skip') || '0'))
@@ -71,34 +73,29 @@ const PostsManager = () => {
     navigate(`?${params.toString()}`)
   }
 
-  // 게시물 가져오기
-  const fetchPosts = () => {
-    setLoading(true)
-    let postsData
-    let usersData
+  // 데이터 결합 로직
+  const getPosts = ({ postsData, usersData }: { postsData: { posts: Post[] }; usersData: { users: User[] } }) => {
+    return postsData.posts.map((post: Post) => ({
+      ...post,
+      author: usersData.users.find((user: User) => user.id === post.authorId),
+    }))
+  }
 
-    fetch(`/api/posts?limit=${limit}&skip=${skip}`)
-      .then((response) => response.json())
-      .then((data) => {
-        postsData = data
-        return fetch('/api/users?limit=0&select=username,image')
-      })
-      .then((response) => response.json())
-      .then((users) => {
-        usersData = users.users
-        const postsWithUsers = postsData.posts.map((post: Post) => ({
-          ...post,
-          author: usersData.find((user: User) => user.id === post.userId),
-        }))
-        setPosts(postsWithUsers)
-        setTotal(postsData.total)
-      })
-      .catch((error) => {
-        console.error('게시물 가져오기 오류:', error)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+  // 상태 관리 로직
+  const handleFetchPosts = async () => {
+    setLoading(true)
+    try {
+      const [postsData, usersData] = await Promise.all([fetchPosts({ limit, skip }), fetchUsers()])
+
+      const postsWithUsers = getPosts({ postsData, usersData })
+
+      setPosts(postsWithUsers)
+      setTotal(postsData.total)
+    } catch (error) {
+      console.error('Error handling posts:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   // 태그 가져오기
@@ -115,7 +112,7 @@ const PostsManager = () => {
   // 게시물 검색
   const searchPosts = async () => {
     if (!searchQuery) {
-      fetchPosts()
+      handleFetchPosts()
       return
     }
     setLoading(true)
@@ -133,7 +130,7 @@ const PostsManager = () => {
   // 태그별 게시물 가져오기
   const fetchPostsByTag = async (tag) => {
     if (!tag || tag === 'all') {
-      fetchPosts()
+      handleFetchPosts()
       return
     }
     setLoading(true)
@@ -224,6 +221,7 @@ const PostsManager = () => {
         body: JSON.stringify(newComment),
       })
       const data = await response.json()
+      console.log('data0000000000', data)
       setComments((prev) => ({
         ...prev,
         [data.postId]: [...(prev[data.postId] || []), data],
@@ -255,7 +253,7 @@ const PostsManager = () => {
   }
 
   // 댓글 삭제
-  const deleteComment = async (id, postId) => {
+  const deleteComment = async ({ id, postId }: { id: Comment['id']; postId: Post['id'] }) => {
     try {
       await fetch(`/api/comments/${id}`, {
         method: 'DELETE',
@@ -301,6 +299,7 @@ const PostsManager = () => {
     try {
       const response = await fetch(`/api/users/${user.id}`)
       const userData = await response.json()
+
       setSelectedUser(userData)
       setShowUserModal(true)
     } catch (error) {
@@ -316,7 +315,7 @@ const PostsManager = () => {
     if (selectedTag) {
       fetchPostsByTag(selectedTag)
     } else {
-      fetchPosts()
+      handleFetchPosts()
     }
     updateURL()
   }, [skip, limit, sortBy, sortOrder, selectedTag])
@@ -464,7 +463,7 @@ const PostsManager = () => {
               >
                 <Edit2 className="w-3 h-3" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => deleteComment(comment.id, postId)}>
+              <Button variant="ghost" size="sm" onClick={() => deleteComment({ id: comment.id, postId })}>
                 <Trash2 className="w-3 h-3" />
               </Button>
             </div>

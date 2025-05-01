@@ -1,45 +1,67 @@
-import { Post, PostsResponse, SearchParams } from '@/entities/types'
-import { fetchApi } from './base'
+import { Post, NewPost, PostsSearchParams } from '@/shared/types/post'
+import { PaginatedResponse } from '../types/common'
 
+export type PostsPaginationParams = Pick<PostsSearchParams, 'limit' | 'skip'>
+export interface PostsResponse extends PaginatedResponse {
+  posts: Post[]
+}
 export const postsApi = {
-  fetchPosts: async (params: SearchParams): Promise<PostsResponse> => {
+  fetchPosts: async (params: PostsSearchParams): Promise<PostsResponse> => {
     const searchParams = new URLSearchParams()
     if (params.limit) searchParams.set('limit', params.limit.toString())
     if (params.skip) searchParams.set('skip', params.skip.toString())
     if (params.sortBy) searchParams.set('sortBy', params.sortBy)
     if (params.sortOrder) searchParams.set('sortOrder', params.sortOrder)
-    
-    return fetchApi<PostsResponse>(`/posts?${searchParams.toString()}`)
+
+    const response = (await fetch(`/api/posts?${searchParams.toString()}`)).json()
+    return response
   },
 
   searchPosts: async (query: string): Promise<PostsResponse> => {
-    return fetchApi<PostsResponse>(`/posts/search?q=${encodeURIComponent(query)}`)
+    const response = await fetch(`/api/posts/search?q=${encodeURIComponent(query)}`)
+    return response.json()
   },
 
   fetchPostsByTag: async (tag: string): Promise<PostsResponse> => {
-    return fetchApi<PostsResponse>(`/posts/tag/${encodeURIComponent(tag)}`)
+    const response = await fetch(`/api/posts/tag/${encodeURIComponent(tag)}`)
+    return response.json()
   },
 
-  addPost: async (post: Omit<Post, 'id'>): Promise<Post> => {
-    return fetchApi<Post>('/posts/add', {
+  addPost: async (post: NewPost): Promise<Post> => {
+    const response = await fetch('/api/posts/add', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(post),
     })
+    return response.json()
   },
 
   updatePost: async (post: Post): Promise<Post> => {
-    return fetchApi<Post>(`/posts/${post.id}`, {
+    const response = await fetch(`/api/posts/${post.id}`, {
       method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(post),
     })
+    return response.json()
   },
 
   deletePost: async (id: number): Promise<void> => {
-    await fetch(`/api/posts/${id}`, { method: "DELETE" })
+    await fetch(`/api/posts/${id}`, { method: 'DELETE' })
   },
 
   fetchTags: async (): Promise<string[]> => {
-    const response = await fetch("/api/posts/tags")
+    const response = await fetch('/api/posts/tags')
     return response.json()
   },
+}
+
+export const fetchPosts = async ({ limit, skip }: PostsPaginationParams): Promise<PostsResponse> => {
+  try {
+    const response = await fetch(`/api/posts?limit=${limit}&skip=${skip}`)
+    const data = await response.json()
+    return data
+  } catch (error: unknown) {
+    console.error('Error fetching posts:', error)
+    throw error
+  }
 }

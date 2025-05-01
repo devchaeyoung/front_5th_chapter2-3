@@ -1,22 +1,27 @@
-import type { User } from "@/entities/user/types"
+import type { PaginatedResponse } from '../types/common'
+import type { User, UserDetail } from '@/shared/types/user'
 
-export const fetchUsers = async (): Promise<User[]> => {
-  try {
-    const response = await fetch("/api/users?limit=0&select=username,image");
-    const data = await response.json();
-    return data.users;
-  } catch (error) {
-    console.error("fetchUsers 오류:", error);
-    throw error;
-  }
-};
+export interface PostsResponse extends PaginatedResponse {
+  users: User[]
+}
 
-export const fetchUserById = async (userId: number): Promise<User> => {
+export const fetchUsers = async (): Promise<PostsResponse> => {
   try {
-    const response = await fetch(`/api/users/${userId}`);
-    return await response.json();
+    const response = await fetch('/api/users?limit=0&select=username,image')
+    const data = await response.json()
+    return data
   } catch (error) {
-    console.error("fetchUserById 오류:", error);
-    throw error;
+    console.error('fetchUsers error:', error)
+    throw error
   }
-};
+}
+
+export const fetchUserById = async (userId: number): Promise<UserDetail> => {
+  try {
+    const response = await fetch(`/api/users/${userId}`)
+    return await response.json()
+  } catch (error) {
+    console.error('fetchUserById error:', error)
+    throw error
+  }
+}
